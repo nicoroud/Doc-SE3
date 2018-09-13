@@ -84,3 +84,5 @@ ls -alh /tftpboot
 df -h
 ```
 …pour vérifier que `/` a plus de place, et **vous pouvez respirer !**
+
+Source : https://github.com/SambaEdu/se3-docs/blob/master/se3-migration/AugmenterRacine.md
