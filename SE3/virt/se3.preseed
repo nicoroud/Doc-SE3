@@ -1,0 +1,191 @@
+# Language
+# MODIFICATION : langue, pays et parametres regionaux
+# mettre en append → locale=fr_FR
+# ----------------
+d-i debian-installer/locale string fr_FR
+
+# Disposition de clavier à utiliser
+# MODIFICATION : clavier "azerty"
+# mettre en append → keymap=fr(latin9)
+# ----------------
+d-i keymap select fr(latin9)
+
+# network configuration
+# netcfg will choose an interface that has link if possible. This makes it
+# skip displaying a list if there is more than one interface.
+
+##d-i preseed/run string netcfg.sh
+d-i netcfg/choose_interface select auto
+d-i netcfg/disable_dhcp boolean true
+d-i netcfg/use_dhcp boolean false
+d-i netcfg/dhcp_options select Configure network manually
+d-i netcfg/get_nameservers string 192.168.1.1
+d-i netcfg/get_ipaddress string 192.168.1.4
+d-i netcfg/get_netmask string 255.255.255.0
+d-i netcfg/get_gateway string 192.168.1.1
+d-i netcfg/confirm_static boolean true
+d-i netcfg/get_hostname string se3
+d-i netcfg/get_domain string demo.homenet.org
+
+
+ The LDAP configuration of slapd, NSS and PAM are completely overwritten by ldapedu
+ libnss-ldap shared/ldapns/ldap-server string ldapi:///
+ libnss-ldap shared/ldapns/base-dn string ou=clg-demo,ou=homenet,ou=education,o=gouv,c=fr
+ libnss-ldap shared/ldapns/ldap_version select 3 
+ libnss-ldap libnss-ldap/dblogin boolean false
+ libnss-ldap libnss-ldap/binddn string cn=admin,ou=clg-demo,ou=homenet,ou=education,o=gouv,c=fr
+ libnss-ldap libnss-ldap/bindpw password
+ libnss-ldap libnss-ldap/dbrootlogin boolean true
+ libnss-ldap libnss-ldap/rootbinddn string cn=admin,ou=clg-demo,ou=homenet,ou=education,o=gouv,c=fr
+ libnss-ldap libnss-ldap/rootbindpw AUTO
+ libnss-ldap libnss-ldap/nsswitch note
+ libnss-ldap libnss-ldap/override boolean false
+ libpam-ldap libpam-ldap/dblogin boolean false
+ libpam-ldap libpam-ldap/binddn string cn=admin,ou=clg-demo,ou=homenet,ou=education,o=gouv,c=fr
+ libpam-ldap libpam-ldap/bindpw AUTO
+ libpam-ldap libpam-ldap/dbrootlogin boolean true
+ libpam-ldap libpam-ldap/rootbinddn string cn=admin,ou=clg-demo,ou=homenet,ou=education,o=gouv,c=fr
+ libpam-ldap libpam-ldap/rootbindpw AUTO
+ libpam-ldap libpam-ldap/override boolean false
+ slapd slapd/password1 AUTO
+ slapd slapd/password2 AUTO
+ ldapedu ldapedu/dopamconf boolean true
+ ldapedu-server ldapedu-server/rid string 001
+ ldapedu-server ldapedu-server/master string 
+ ldapedu-server ldapedu-server/adminpass string KorTeX50
+ ldapedu-server ldapedu-server/adminpassverif string KorTeX50
+
+# AJOUT, pour indiquer le miroir et éventuellement le proxy pour atteindre le miroir
+# Mirror settings
+# ----------------
+d-i mirror/country string manual
+d-i mirror/http/hostname string httpredir.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/suite string wheezy
+d-i mirror/http/proxy string
+
+# AJOUT, pour indiquer le miroir et éventuellement le proxy pour atteindre le miroir
+# Mirror settings
+# ----------------
+d-i mirror/country string manual
+d-i mirror/http/hostname string httpredir.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/suite string wheezy
+d-i mirror/http/proxy string
+
+# Standart drive controler
+# ----------------
+d-i hw-detect/load_firmware boolean true
+#d-i partman-auto/disk string /dev/sda
+
+# Partitioning disk in several partitions without lvm
+# ----------------
+# choice no LVM
+# Hard drive partitionning section
+
+d-i partman-auto/automatically_partition string regular
+d-i partman-auto/select_disk select /dev/discs/disc0/disc
+d-i partman-auto/method string regular
+d-i partman-lvm/confirm boolean true
+d-i partman-auto/purge_lvm_from_device boolean true
+d-i partman-auto/expert_recipe_file string /hd-media/recipe
+
+
+#d-i partman-auto/disk string /dev/sda
+
+# personal SE3 V2 Scheme partitions 
+
+d-i partman-auto/expert_recipe string                         \
+      se3-recette ::                                          \
+              3000 4000 5000 ext3                                \
+                      $primary{ } $bootable{ }              \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext3 }    \
+                      mountpoint{ / }                     \
+       .                                               		\
+              100% 200% 400% linux-swap               \
+                      $primary{ }                             \
+                      method{ swap } format{ }                \
+       .                                       			\
+               8000  ext3                            \
+                      $primary{ }                             \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ ext3 }    \
+                      mountpoint{ /var }			\
+	.							\
+              15000 20000 40000 xfs		\
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ xfs }    \
+                      mountpoint{ /home }     		     \
+	.						     \
+              15000 20000 40000 xfs                 \
+                      method{ format } format{ }              \
+                      use_filesystem{ } filesystem{ xfs }    \
+                      mountpoint{ /var/se3 }     	     \
+        .
+d-i partman-auto/choose_recipe select se3-recette
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/alignment select cylinder
+d-i partman/confirm boolean true
+d-i partman/choose_partition select Finish partitioning and write changes to disk
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+
+# Time server
+# -------------------
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/Paris
+d-i clock-setup/ntp boolean true
+
+# sources lists 
+# ----------------
+d-i apt-setup/non-free boolean true
+d-i apt-setup/contrib boolean true
+d-i apt-setup/services-select multiselect security, volatile
+d-i apt-setup/security_host string security.debian.org
+d-i apt-setup/volatile_host string volatile.debian.org
+# devalide l'utilisation des miroirs distants
+d-i apt-setup/local0/source boolean false
+
+# AJOUT, pour éviter de répondre à la question
+# Some versions of the installer can report back on what software you have
+# installed, and what software you use. The default is not to report back,
+# but sending reports helps the project determine what software is most
+# popular and include it on CDs.
+# ----------------
+popularity-contest popularity-contest/participate boolean false
+
+#-----------------
+d-i debian-installer/allow_unauthenticated boolean true
+
+# AJOUT, pour éviter de répondre à la question
+# Some versions of the installer can report back on what software you have
+# installed, and what software you use. The default is not to report back,
+# but sending reports helps the project determine what software is most
+# popular and include it on CDs.
+# ----------------
+popularity-contest popularity-contest/participate boolean false
+
+# Passwd super user
+# -----------------
+d-i passwd/make-user boolean false
+d-i passwd/root-password password dise3
+d-i passwd/root-password-again password dise3
+
+
+# Grub install
+# ------------
+d-i grub-installer/only_debian boolean true
+tasksel tasksel/first multiselect standard
+
+
+# MODIFICATION, Preseed commands
+# mise en place de l'autologin et des fichiers pour la phase 3
+# ----------------
+d-i preseed/late_command string cp se3scripts/* ./; \
+    chmod +x se3-early-command.sh se3-post-base-installer.sh install_phase2.sh; \
+    ./se3-early-command.sh se3-post-base-installer.sh
+
+# Finishing behaviour
+d-i finish-install/reboot_in_progress note
